@@ -1,0 +1,39 @@
+name: Update Nodes
+on:
+  schedule:
+    - cron: '0 */6 * * *' # 每6小时执行一次
+  workflow_dispatch:      # 允许手动点击按钮触发
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Processing Script
+        env:
+          # 请在 GitHub 仓库 Settings -> Secrets -> Actions 中添加 SUBSCRIBE_URL
+          SUBSCRIBE_URL: ${{ secrets.SUBSCRIBE_URL }} 
+        run: python process.py
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          keep_files: true # 保留其它文件
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
