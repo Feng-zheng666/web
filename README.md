@@ -29,22 +29,34 @@
 
 ## 部署方式
 
-### 1. GitHub Pages（推荐）
-1. 在GitHub仓库设置中启用GitHub Pages
-2. 配置 `SUBSCRIPTION_LINK` secret（Base64编码的订阅链接）
-3. 工作流将自动每6小时更新节点数据
+### GitHub Pages（推荐且已配置）
+项目已完全配置为使用GitHub Pages部署：
 
-### 2. Netlify
-- 自动检测 `netlify.toml` 配置
-- 部署为静态站点
+1. **启用GitHub Pages**：
+   - 在GitHub仓库设置中，转到 "Pages" 部分
+   - 选择部署源为 "GitHub Actions"
 
-### 3. Vercel
-- 自动检测 `vercel.json` 配置
-- 部署为静态站点
+2. **配置Secrets**：
+   - 在仓库设置中，转到 "Secrets and variables" → "Actions"
+   - 添加 `SUBSCRIPTION_LINK` secret，值为Base64编码的订阅链接
 
-### 4. Cloudflare Pages
-- 自动检测 `wrangler.jsonc` 配置
-- 使用Worker处理路由
+3. **自动更新**：
+   - 工作流将自动每6小时更新节点数据
+   - 也可手动触发：在Actions标签页中运行 "Update Nodes Database" 工作流
+
+### 其他平台部署说明
+
+项目包含以下平台的配置文件，但**推荐使用GitHub Pages**：
+
+- **Netlify**：自动检测 `netlify.toml` 配置
+- **Vercel**：自动检测 `vercel.json` 配置  
+- **Cloudflare Pages**：使用 `functions/_worker.js` 进行简单重定向
+
+### 重要提示：避免wrangler部署错误
+如果遇到 `npx wrangler deploy` 错误，请确保：
+1. 已删除任何 `wrangler.jsonc` 文件（本项目已不包含）
+2. 使用GitHub Pages而非Cloudflare Workers进行部署
+3. Cloudflare Pages用户应使用Pages产品而非Workers
 
 ## 本地运行
 
