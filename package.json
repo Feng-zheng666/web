@@ -1,0 +1,15 @@
+{
+  "name": "web",
+  "version": "1.0.0",
+  "description": "节点优选系统 - Web界面",
+  "scripts": {
+    "build": "echo 'Static site - no build required'",
+    "deploy": "echo 'Use Cloudflare Pages UI for deployment'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
