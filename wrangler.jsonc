@@ -1,0 +1,9 @@
+{
+  "name": "web-nodes-optimizer",
+  "compatibility_date": "2026-01-18",
+  "pages_build_output_dir": ".",
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS"
+  }
+}
