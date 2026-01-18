@@ -26,18 +26,23 @@
                     <div class="info-card">
                         <div class="info-label">
                             <i class="fas fa-server"></i>
-                            <span>测试服务器</span>
+                            <span>测试服务器IP</span>
                         </div>
                         <div class="info-value" id="runner-ip">加载中...</div>
                         <div class="info-location" id="runner-location">位置: 获取中...</div>
+                        <div class="info-detail" id="runner-isp">ISP: 获取中...</div>
                     </div>
                 </div>
             </div>
             
             <div class="status-bar">
                 <div class="status-item">
-                    <span class="status-label">最后更新:</span>
-                    <span class="status-value" id="last-update">--:--:--</span>
+                    <span class="status-label">上次测试时间:</span>
+                    <span class="status-value" id="last-test-time">--:--:--</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">测试状态:</span>
+                    <span class="status-value" id="test-status">等待中</span>
                 </div>
                 <div class="status-item">
                     <span class="status-label">在线节点:</span>
@@ -51,6 +56,12 @@
                     <button class="cyber-button" id="refresh-btn">
                         <i class="fas fa-sync-alt"></i>
                         <span>手动更新</span>
+                    </button>
+                </div>
+                <div class="status-item">
+                    <button class="cyber-button secondary" id="force-test-btn">
+                        <i class="fas fa-bolt"></i>
+                        <span>强制测试</span>
                     </button>
                 </div>
             </div>
