@@ -1,0 +1,150 @@
+{
+  "server_info": {
+    "ip": "140.82.121.3",
+    "country": "United States",
+    "city": "San Francisco",
+    "isp": "GitHub, Inc.",
+    "region": "California",
+    "timezone": "America/Los_Angeles",
+    "timestamp": "2026-01-18T09:28:00Z"
+  },
+  "nodes": [
+    {
+      "name": "JP-Tokyo-01",
+      "address": "45.76.123.45",
+      "port": 443,
+      "latency": 45,
+      "country": "Japan",
+      "city": "Tokyo",
+      "isp": "Vultr Holdings LLC",
+      "region": "Tokyo",
+      "timezone": "Asia/Tokyo",
+      "protocol": "vmess",
+      "status": "active"
+    },
+    {
+      "name": "US-LA-01",
+      "address": "104.238.123.45",
+      "port": 443,
+      "latency": 120,
+      "country": "United States",
+      "city": "Los Angeles",
+      "isp": "DigitalOcean LLC",
+      "region": "California",
+      "timezone": "America/Los_Angeles",
+      "protocol": "trojan",
+      "status": "active"
+    },
+    {
+      "name": "HK-01",
+      "address": "103.123.45.67",
+      "port": 443,
+      "latency": 65,
+      "country": "Hong Kong",
+      "city": "Hong Kong",
+      "isp": "Alibaba Cloud",
+      "region": "Central and Western",
+      "timezone": "Asia/Hong_Kong",
+      "protocol": "vless",
+      "status": "active"
+    },
+    {
+      "name": "SG-01",
+      "address": "139.180.123.45",
+      "port": 443,
+      "latency": 85,
+      "country": "Singapore",
+      "city": "Singapore",
+      "isp": "Linode LLC",
+      "region": "Singapore",
+      "timezone": "Asia/Singapore",
+      "protocol": "vmess",
+      "status": "active"
+    },
+    {
+      "name": "JP-Osaka-01",
+      "address": "45.32.123.45",
+      "port": 443,
+      "latency": 55,
+      "country": "Japan",
+      "city": "Osaka",
+      "isp": "Vultr Holdings LLC",
+      "region": "Osaka",
+      "timezone": "Asia/Tokyo",
+      "protocol": "trojan",
+      "status": "active"
+    },
+    {
+      "name": "US-NY-01",
+      "address": "192.81.123.45",
+      "port": 443,
+      "latency": 150,
+      "country": "United States",
+      "city": "New York",
+      "isp": "DigitalOcean LLC",
+      "region": "New York",
+      "timezone": "America/New_York",
+      "protocol": "vmess",
+      "status": "active"
+    },
+    {
+      "name": "TW-01",
+      "address": "103.123.45.89",
+      "port": 443,
+      "latency": 75,
+      "country": "Taiwan",
+      "city": "Taipei",
+      "isp": "Chunghwa Telecom",
+      "region": "Taipei",
+      "timezone": "Asia/Taipei",
+      "protocol": "vless",
+      "status": "active"
+    },
+    {
+      "name": "DE-01",
+      "address": "95.179.123.45",
+      "port": 443,
+      "latency": 180,
+      "country": "Germany",
+      "city": "Frankfurt",
+      "isp": "Hetzner Online GmbH",
+      "region": "Hesse",
+      "timezone": "Europe/Berlin",
+      "protocol": "vmess",
+      "status": "active"
+    },
+    {
+      "name": "UK-01",
+      "address": "139.180.123.46",
+      "port": 443,
+      "latency": 160,
+      "country": "United Kingdom",
+      "city": "London",
+      "isp": "Linode LLC",
+      "region": "England",
+      "timezone": "Europe/London",
+      "protocol": "trojan",
+      "status": "active"
+    },
+    {
+      "name": "KR-01",
+      "address": "103.123.45.90",
+      "port": 443,
+      "latency": 70,
+      "country": "South Korea",
+      "city": "Seoul",
+      "isp": "KT Corporation",
+      "region": "Seoul",
+      "timezone": "Asia/Seoul",
+      "protocol": "vmess",
+      "status": "active"
+    }
+  ],
+  "statistics": {
+    "total_nodes": 10,
+    "active_nodes": 10,
+    "average_latency": 100,
+    "countries": ["Germany", "Hong Kong", "Japan", "Singapore", "South Korea", "Taiwan", "United Kingdom", "United States"],
+    "last_updated": "2026-01-18T09:28:00Z"
+  }
+}

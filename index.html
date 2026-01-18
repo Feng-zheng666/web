@@ -1,494 +1,142 @@
-<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NODE MONITOR // SYSTEM STATUS</title>
-    <style>
-        :root {
-            --bg-color: #050505;
-            --card-bg: #0a0f14;
-            --primary: #00f3ff;
-            --secondary: #bc13fe;
-            --text-main: #e0e0e0;
-            --text-dim: #6e7d89;
-            --border: 1px solid rgba(0, 243, 255, 0.2);
-            --glow: 0 0 10px rgba(0, 243, 255, 0.3);
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: 'Courier New', Courier, monospace; /* 复古终端字体 */
-            margin: 0;
-            padding: 20px;
-            background-image: 
-                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        header {
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 20px;
-            margin-bottom: 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            text-shadow: var(--glow);
-        }
-
-        h1 { margin: 0; font-size: 2.5rem; letter-spacing: 2px; color: var(--primary); }
-        .timestamp { color: var(--secondary); font-size: 0.9rem; }
-
-        /* 仪表盘区域 */
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .status-card {
-            background: var(--card-bg);
-            border: var(--border);
-            padding: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .status-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--primary), transparent);
-        }
-
-        .status-label { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; }
-        .status-value { font-size: 1.5rem; margin-top: 10px; color: var(--text-main); }
-        .status-ip { font-family: monospace; color: var(--secondary); }
-
-        /* 节点列表 */
-        .node-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
-        }
-
-        .node-card {
-            background: rgba(16, 20, 25, 0.8);
-            border: 1px solid #333;
-            padding: 15px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .node-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: var(--glow);
-        }
-
-        .node-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 5px;
-        }
-
-        .flag { font-size: 1.2rem; }
-        .latency { 
-            color: #00ff9d; 
-            font-weight: bold;
-        }
-        .latency.slow { color: #ffeb3b; }
-        .latency.bad { color: #ff3d00; }
-
-        .node-info div { margin: 5px 0; font-size: 0.9rem; }
-        .label { color: var(--text-dim); margin-right: 5px; }
-
-        .copy-btn {
-            display: block;
-            width: 100%;
-            background: transparent;
-            border: 1px solid var(--secondary);
-            color: var(--secondary);
-            padding: 8px;
-            margin-top: 10px;
-            cursor: pointer;
-            text-transform: uppercase;
-            font-family: inherit;
-            transition: 0.2s;
-        }
-
-        .copy-btn:hover {
-            background: var(--secondary);
-            color: #fff;
-        }
-
-        /* 加载动画 */
-        .loading {
-            text-align: center;
-            font-size: 1.5rem;
-            color: var(--primary);
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink { 50% { opacity: 0.5; } }
-    </style>
+    <title>节点优选系统 - 赛博朋克风格</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔗</text></svg>">
 </head>
 <body>
+    <div class="cyber-container">
+        <!-- 顶部标题栏 -->
+        <header class="cyber-header">
+            <div class="header-grid">
+                <div class="logo-section">
+                    <h1 class="cyber-title">
+                        <i class="fas fa-satellite-dish"></i>
+                        <span class="glitch" data-text="节点优选系统">节点优选系统</span>
+                    </h1>
+                    <p class="cyber-subtitle">自动化节点测试与地理分析平台</p>
+                </div>
+                
+                <div class="server-info">
+                    <div class="info-card">
+                        <div class="info-label">
+                            <i class="fas fa-server"></i>
+                            <span>测试服务器</span>
+                        </div>
+                        <div class="info-value" id="runner-ip">加载中...</div>
+                        <div class="info-location" id="runner-location">位置: 获取中...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="status-label">最后更新:</span>
+                    <span class="status-value" id="last-update">--:--:--</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">在线节点:</span>
+                    <span class="status-value" id="online-count">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">国家/地区:</span>
+                    <span class="status-value" id="country-count">0</span>
+                </div>
+                <div class="status-item">
+                    <button class="cyber-button" id="refresh-btn">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>手动更新</span>
+                    </button>
+                </div>
+            </div>
+        </header>
 
-<div class="container">
-    <header>
-        <div>
-            <h1>NET.LINK // OPTIMIZER</h1>
-            <div style="font-size: 0.8rem; opacity: 0.7;">SECURE TUNNELING PROTOCOL ANALYSIS</div>
-        </div>
-        <div class="timestamp" id="update-time">SYSTEM STATUS: INITIALIZING...</div>
-    </header>
+        <!-- 主内容区 -->
+        <main class="cyber-main">
+            <!-- 地理分类导航 -->
+            <div class="geo-nav">
+                <div class="geo-nav-header">
+                    <i class="fas fa-globe-americas"></i>
+                    <h2>地理分类</h2>
+                </div>
+                <div class="geo-filters" id="country-filters">
+                    <!-- 国家过滤器将通过JS动态生成 -->
+                    <div class="filter-all active" data-country="all">
+                        <i class="fas fa-layer-group"></i>
+                        <span>全部节点</span>
+                    </div>
+                </div>
+            </div>
 
-    <div class="dashboard">
-        <div class="status-card">
-            <div class="status-label">Monitor Location (Server)</div>
-            <div class="status-value" id="runner-loc">DETECTING...</div>
-            <div class="status-ip" id="runner-ip">0.0.0.0</div>
-        </div>
-        <div class="status-card">
-            <div class="status-label">Total Active Nodes</div>
-            <div class="status-value" id="node-count">0</div>
-            <div class="status-label" style="margin-top: 5px;">Filtered from source</div>
-        </div>
+            <!-- 节点卡片网格 -->
+            <div class="nodes-grid" id="nodes-container">
+                <!-- 节点卡片将通过JS动态生成 -->
+                <div class="loading-card">
+                    <div class="loading-spinner">
+                        <div class="cyber-spinner"></div>
+                    </div>
+                    <p>正在加载节点数据...</p>
+                </div>
+            </div>
+
+            <!-- 延迟图例 -->
+            <div class="legend-section">
+                <div class="legend-header">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <h3>延迟颜色说明</h3>
+                </div>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="color-box excellent"></div>
+                        <span>极速 (< 100ms)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="color-box good"></div>
+                        <span>良好 (100-200ms)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="color-box moderate"></div>
+                        <span>一般 (200-300ms)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="color-box poor"></div>
+                        <span>较慢 (> 300ms)</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 底部信息栏 -->
+        <footer class="cyber-footer">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <p>
+                        <i class="fas fa-code"></i>
+                        基于 GitHub Actions 自动化处理 | 每6小时更新
+                    </p>
+                </div>
+                <div class="footer-right">
+                    <p>
+                        <i class="fas fa-info-circle"></i>
+                        数据来源: IP-API.com | 仅用于技术演示
+                    </p>
+                </div>
+            </div>
+            <div class="scan-line"></div>
+        </footer>
     </div>
 
-    <h2 style="color: var(--text-dim); border-bottom: 1px solid #333; padding-bottom: 10px;">OPTIMIZED NODE MATRIX</h2>
-    <div id="node-list" class="node-grid">
-        <div class="loading">Loading System Data...</div>
+    <!-- 复制成功提示 -->
+    <div class="copy-notification" id="copy-notification">
+        <i class="fas fa-check-circle"></i>
+        <span>节点链接已复制到剪贴板！</span>
     </div>
-</div>
 
-<script>
-    async function init() {
-        try {
-            // 添加时间戳防止缓存
-            const response = await fetch('nodes.json?t=' + new Date().getTime());
-            if (!response.ok) throw new Error("Data not found");
-            const data = await response.json();
-
-            // 更新头部信息
-            document.getElementById('update-time').innerText = `LAST UPDATE: ${data.updated_at}`;
-            
-            // 更新 Runner 信息
-            const r = data.runner_ip;
-            document.getElementById('runner-loc').innerText = `${r.city}, ${r.country}`;
-            document.getElementById('runner-ip').innerText = `IP: ${r.query} | ISP: ${r.isp}`;
-            document.getElementById('node-count').innerText = data.nodes.length;
-
-            renderNodes(data.nodes);
-
-        } catch (e) {
-            document.getElementById('node-list').innerHTML = `<div style="color:red">SYSTEM ERROR: ${e.message}</div>`;
-        }
-    }
-
-    function renderNodes(nodes) {
-        const container = document.getElementById('node-list');
-        container.innerHTML = '';
-
-        nodes.forEach(node => {
-            const card = document.createElement('div');
-            card.className = 'node-card';
-            
-            // 延迟颜色处理
-            let latClass = '';
-            if (node.latency > 500) latClass = 'bad';
-            else if (node.latency > 200) latClass = 'slow';
-
-            card.innerHTML = `
-                <div class="node-header">
-                    <span class="flag">${getFlagEmoji(node.country)} ${node.country}</span>
-                    <span class="latency ${latClass}">${node.latency}ms</span>
-                </div>
-                <div class="node-info">
-                    <div><span class="label">LOC:</span> ${node.city}</div>
-                    <div><span class="label">ISP:</span> ${node.isp || 'N/A'}</div>
-                    <div><span class="label">NAME:</span> ${node.name}</div>
-                </div>
-                <button class="copy-btn" onclick="copyLink('${node.link}')">Copy Link</button>
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    function copyLink(text) {
-        navigator.clipboard.writeText(text).then(() => {
-            alert('LINK COPIED TO CLIPBOARD');
-        });
-    }
-
-    // 简单的国家代码转 Emoji (如果不准确可以使用图片库)
-    function getFlagEmoji(countryName) {
-        // 这里只是简单示例，实际可能需要更复杂的映射
-        return '🌐'; 
-    }
-
-    init();
-</script>
-
+    <script src="script.js"></script>
 </body>
-=======
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NODE MONITOR // SYSTEM STATUS</title>
-    <style>
-        :root {
-            --bg-color: #050505;
-            --card-bg: #0a0f14;
-            --primary: #00f3ff;
-            --secondary: #bc13fe;
-            --text-main: #e0e0e0;
-            --text-dim: #6e7d89;
-            --border: 1px solid rgba(0, 243, 255, 0.2);
-            --glow: 0 0 10px rgba(0, 243, 255, 0.3);
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: 'Courier New', Courier, monospace; /* 复古终端字体 */
-            margin: 0;
-            padding: 20px;
-            background-image: 
-                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        header {
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 20px;
-            margin-bottom: 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            text-shadow: var(--glow);
-        }
-
-        h1 { margin: 0; font-size: 2.5rem; letter-spacing: 2px; color: var(--primary); }
-        .timestamp { color: var(--secondary); font-size: 0.9rem; }
-
-        /* 仪表盘区域 */
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .status-card {
-            background: var(--card-bg);
-            border: var(--border);
-            padding: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .status-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--primary), transparent);
-        }
-
-        .status-label { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; }
-        .status-value { font-size: 1.5rem; margin-top: 10px; color: var(--text-main); }
-        .status-ip { font-family: monospace; color: var(--secondary); }
-
-        /* 节点列表 */
-        .node-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
-        }
-
-        .node-card {
-            background: rgba(16, 20, 25, 0.8);
-            border: 1px solid #333;
-            padding: 15px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .node-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: var(--glow);
-        }
-
-        .node-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 5px;
-        }
-
-        .flag { font-size: 1.2rem; }
-        .latency { 
-            color: #00ff9d; 
-            font-weight: bold;
-        }
-        .latency.slow { color: #ffeb3b; }
-        .latency.bad { color: #ff3d00; }
-
-        .node-info div { margin: 5px 0; font-size: 0.9rem; }
-        .label { color: var(--text-dim); margin-right: 5px; }
-
-        .copy-btn {
-            display: block;
-            width: 100%;
-            background: transparent;
-            border: 1px solid var(--secondary);
-            color: var(--secondary);
-            padding: 8px;
-            margin-top: 10px;
-            cursor: pointer;
-            text-transform: uppercase;
-            font-family: inherit;
-            transition: 0.2s;
-        }
-
-        .copy-btn:hover {
-            background: var(--secondary);
-            color: #fff;
-        }
-
-        /* 加载动画 */
-        .loading {
-            text-align: center;
-            font-size: 1.5rem;
-            color: var(--primary);
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink { 50% { opacity: 0.5; } }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <header>
-        <div>
-            <h1>NET.LINK // OPTIMIZER</h1>
-            <div style="font-size: 0.8rem; opacity: 0.7;">SECURE TUNNELING PROTOCOL ANALYSIS</div>
-        </div>
-        <div class="timestamp" id="update-time">SYSTEM STATUS: INITIALIZING...</div>
-    </header>
-
-    <div class="dashboard">
-        <div class="status-card">
-            <div class="status-label">Monitor Location (Server)</div>
-            <div class="status-value" id="runner-loc">DETECTING...</div>
-            <div class="status-ip" id="runner-ip">0.0.0.0</div>
-        </div>
-        <div class="status-card">
-            <div class="status-label">Total Active Nodes</div>
-            <div class="status-value" id="node-count">0</div>
-            <div class="status-label" style="margin-top: 5px;">Filtered from source</div>
-        </div>
-    </div>
-
-    <h2 style="color: var(--text-dim); border-bottom: 1px solid #333; padding-bottom: 10px;">OPTIMIZED NODE MATRIX</h2>
-    <div id="node-list" class="node-grid">
-        <div class="loading">Loading System Data...</div>
-    </div>
-</div>
-
-<script>
-    async function init() {
-        try {
-            // 添加时间戳防止缓存
-            const response = await fetch('nodes.json?t=' + new Date().getTime());
-            if (!response.ok) throw new Error("Data not found");
-            const data = await response.json();
-
-            // 更新头部信息
-            document.getElementById('update-time').innerText = `LAST UPDATE: ${data.updated_at}`;
-            
-            // 更新 Runner 信息
-            const r = data.runner_ip;
-            document.getElementById('runner-loc').innerText = `${r.city}, ${r.country}`;
-            document.getElementById('runner-ip').innerText = `IP: ${r.query} | ISP: ${r.isp}`;
-            document.getElementById('node-count').innerText = data.nodes.length;
-
-            renderNodes(data.nodes);
-
-        } catch (e) {
-            document.getElementById('node-list').innerHTML = `<div style="color:red">SYSTEM ERROR: ${e.message}</div>`;
-        }
-    }
-
-    function renderNodes(nodes) {
-        const container = document.getElementById('node-list');
-        container.innerHTML = '';
-
-        nodes.forEach(node => {
-            const card = document.createElement('div');
-            card.className = 'node-card';
-            
-            // 延迟颜色处理
-            let latClass = '';
-            if (node.latency > 500) latClass = 'bad';
-            else if (node.latency > 200) latClass = 'slow';
-
-            card.innerHTML = `
-                <div class="node-header">
-                    <span class="flag">${getFlagEmoji(node.country)} ${node.country}</span>
-                    <span class="latency ${latClass}">${node.latency}ms</span>
-                </div>
-                <div class="node-info">
-                    <div><span class="label">LOC:</span> ${node.city}</div>
-                    <div><span class="label">ISP:</span> ${node.isp || 'N/A'}</div>
-                    <div><span class="label">NAME:</span> ${node.name}</div>
-                </div>
-                <button class="copy-btn" onclick="copyLink('${node.link}')">Copy Link</button>
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    function copyLink(text) {
-        navigator.clipboard.writeText(text).then(() => {
-            alert('LINK COPIED TO CLIPBOARD');
-        });
-    }
-
-    // 简单的国家代码转 Emoji (如果不准确可以使用图片库)
-    function getFlagEmoji(countryName) {
-        // 这里只是简单示例，实际可能需要更复杂的映射
-        return '🌐'; 
-    }
-
-    init();
-</script>
-
-</body>
->>>>>>> 5325c846ceae166d1671e39c58f0e827dd3b0d20
 </html>
