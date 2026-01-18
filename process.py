@@ -5,191 +5,141 @@ import base64
 import socket
 import requests
 import time
-from urllib.parse import urlparse
+import concurrent.futures
+from urllib.parse import urlparse, unquote
 
 # 配置
-# 在 GitHub Secrets 中设置 SUBSCRIBE_URL，或者直接在这里填入（不推荐公开）
-SUBSCRIBE_URL = os.environ.get("SUBSCRIBE_URL", "你的订阅链接放在这里")
-GEO_API_URL = "http://ip-api.com/batch" # 使用批量查询接口
-TIMEOUT = 3 # 测速超时时间（秒）
+TIMEOUT = 3  # 测速超时
+MAX_WORKERS = 20  # 并发数
+GEO_API_URL = "http://ip-api.com/batch"
 
+class NodeProcessor:
+    def __init__(self):
+        self.nodes = []
+        self.runner_info = {}
 
-def get_subscribe_urls():
-    urls = []
-    # 优先尝试读取本地的 urls.txt 文件
-    if os.path.exists("urls.txt"):
-        with open("urls.txt", "r") as f:
-            urls = [line.strip() for line in f if line.strip()]
-        print("Using URLs from local urls.txt")
-    
-    # 如果文件不存在或为空，则读取环境变量 (GitHub Secrets)
-    if not urls:
-        env_url = os.environ.get("SUBSCRIBE_URL")
-        if env_url:
-            urls = [env_url]
-            print("Using URL from GitHub Secrets")
-            
-    return urls
+    def get_runner_info(self):
+        """获取 GitHub Runner 节点信息"""
+        try:
+            r = requests.get("http://ip-api.com/json/", timeout=5)
+            self.runner_info = r.json()
+        except:
+            self.runner_info = {"query": "Unknown", "country": "Unknown"}
 
-def get_runner_info():
-    """获取当前 GitHub Runner 的真实 IP"""
-    try:
-        r = requests.get("http://ip-api.com/json/", timeout=5)
-        return r.json()
-    except:
-        return {"query": "Unknown", "country": "Unknown", "city": "Unknown"}
+    def decode_base64(self, data):
+        """兼容各种长度的 Base64 解码"""
+        missing_padding = len(data) % 4
+        if missing_padding:
+            data += '=' * (4 - missing_padding)
+        try:
+            return base64.b64decode(data).decode('utf-8')
+        except:
+            return ""
 
-def decode_subscription(url):
-    """下载并解码 Base64 订阅"""
-    try:
-        headers = {'User-Agent': 'Mozilla/5.0'}
-        content = requests.get(url, headers=headers).text
-        # 补全 padding
-        padded = content + "=" * ((4 - len(content) % 4) % 4)
-        decoded_bytes = base64.urlsafe_b64decode(padded)
-        decoded_str = decoded_bytes.decode('utf-8')
-        return decoded_str.splitlines()
-    except Exception as e:
-        print(f"Error decoding subscription: {e}")
-        return []
-
-def parse_node(link):
-    """简单的节点解析 (仅支持 vmess/ss/trojan 的基本提取用于测速)"""
-    # 这里为了演示，主要提取 IP 和端口进行 TCP 握手
-    # 实际生产环境建议使用专门的库解析完整协议
-    host = None
-    port = None
-    name = "Unknown Node"
-    
-    try:
-        if link.startswith("vmess://"):
-            # vmess 是 base64 编码的 json
-            b64 = link[8:]
-            padded = b64 + "=" * ((4 - len(b64) % 4) % 4)
-            info = json.loads(base64.urlsafe_b64decode(padded).decode('utf-8'))
-            host = info.get('add')
-            port = info.get('port')
-            name = info.get('ps', 'Vmess Node')
-        elif link.startswith("ss://"):
-            # ss 解析逻辑简化
-            if '@' in link:
-                part = link.split('@')[1]
-                host_port = part.split('#')[0].split(':')
-                host = host_port[0]
-                port = host_port[1]
-                name = requests.utils.unquote(link.split('#')[1]) if '#' in link else "SS Node"
-    except:
-        pass
-        
-    return host, port, name, link
-
-def tcp_latency(host, port):
-    """TCP 握手测速"""
-    if not host or not port:
-        return -1
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.settimeout(TIMEOUT)
-    start = time.time()
-    try:
-        s.connect((host, int(port)))
-        s.close()
-        return int((time.time() - start) * 1000)
-    except:
-        return -1
-
-def main():
-    print("Starting process...")
-    runner_info = get_runner_info()
-    print(f"Runner IP: {runner_info['query']} ({runner_info['country']})")
-
-    # 在 main 函数中调用
-    urls = get_subscribe_urls()
-    if not urls:
-        print("No subscription URLs found!")
-        return
-        
-    links = decode_subscription(urls[0])
-    valid_nodes = []
-    ips_to_query = []
-
-    print(f"Found {len(links)} nodes provided. Testing connectivity...")
-
-    for link in links:
-        host, port, name, original_link = parse_node(link)
-        if host and port:
-            latency = tcp_latency(host, port)
-            if latency != -1:
-                # 只有通的节点才加入列表
-                print(f"[OK] {latency}ms - {name}")
+    def parse_subscription(self, content):
+        """解析订阅内容，识别各种协议头"""
+        decoded = self.decode_base64(content)
+        lines = decoded.splitlines()
+        extracted = []
+        for line in lines:
+            if not line: continue
+            # 简单的正则提取主机和端口，此处可根据需要扩展各协议详细解析
+            try:
+                # 识别主流协议
+                protocol = line.split('://')[0] if '://' in line else 'unknown'
+                # 尝试提取名称
+                name = unquote(line.split('#')[-1]) if '#' in line else "未命名节点"
                 
-                # 判断 host 是域名还是 IP，如果是域名需解析为 IP 用于查地理位置
-                query_ip = host
-                try:
-                    socket.gethostbyname(host) # 简单验证
-                except:
-                    continue 
+                # 提取地址 (简单逻辑：提取域名或IP)
+                host_part = line.split('@')[-1].split('#')[0] if '@' in line else line.split('://')[-1].split('#')[0]
+                address = host_part.split(':')[0]
+                port = host_part.split(':')[1].split('?')[0] if ':' in host_part else "443"
 
-                node_data = {
+                extracted.append({
                     "name": name,
-                    "host": host,
-                    "port": port,
-                    "latency": latency,
-                    "link": original_link,
-                    "query_ip": query_ip # 用于后续批量查询地理位置
-                }
-                valid_nodes.append(node_data)
-                ips_to_query.append(query_ip)
-            else:
-                print(f"[FAIL] {name}")
-    
-    # 批量获取节点地理位置 (IP-API batch 限制每分钟 15 次请求，每次 100 个 IP)
-    # 简单起见，这里假设节点数不巨量，分批处理
-    geo_results = {}
-    if ips_to_query:
-        # 去重
-        unique_ips = list(set(ips_to_query))
-        # 分块，每块 100 个
-        for i in range(0, len(unique_ips), 100):
-            batch = unique_ips[i:i+100]
-            try:
-                resp = requests.post(GEO_API_URL, json=batch, timeout=10)
-                for item in resp.json():
-                    if 'query' in item:
-                        geo_results[item['query']] = item
-            except Exception as e:
-                print(f"GeoAPI Error: {e}")
-            time.sleep(2) # 礼貌等待
-
-    # 整合数据
-    final_list = []
-    for node in valid_nodes:
-        geo = geo_results.get(node['host'], {}) # 如果 host 是域名可能匹配不到，这里简化处理
-        if not geo: 
-            # 尝试解析域名后的 IP 匹配
-            try:
-                real_ip = socket.gethostbyname(node['host'])
-                geo = geo_results.get(real_ip, {})
+                    "address": address,
+                    "port": int(port),
+                    "protocol": protocol,
+                    "raw": line
+                })
             except:
-                pass
+                continue
+        return extracted
+
+    def test_latency(self, node):
+        """TCP 握手测速"""
+        start_time = time.time()
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(TIMEOUT)
+            sock.connect((node['address'], node['port']))
+            sock.close()
+            node['latency'] = int((time.time() - start_time) * 1000)
+            return node
+        except:
+            return None
+
+    def process(self, sub_url):
+        print(f"[*] 正在获取订阅: {sub_url[:20]}...")
+        self.get_runner_info()
         
-        node['country'] = geo.get('country', 'Unknown')
-        node['city'] = geo.get('city', 'Unknown')
-        node['isp'] = geo.get('isp', 'Unknown')
-        final_list.append(node)
+        try:
+            resp = requests.get(sub_url, timeout=10)
+            raw_nodes = self.parse_subscription(resp.text)
+        except Exception as e:
+            print(f"[!] 获取失败: {e}")
+            return
 
-    # 排序：先按国家排序，再按延迟排序
-    final_list.sort(key=lambda x: (x['country'], x['latency']))
+        print(f"[*] 发现 {len(raw_nodes)} 个节点，开始并发测速...")
+        
+        # 并发测速
+        valid_nodes = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+            futures = [executor.submit(self.test_latency, n) for n in raw_nodes]
+            for future in concurrent.futures.as_completed(futures):
+                res = future.result()
+                if res: valid_nodes.append(res)
 
-    output_data = {
-        "updated_at": time.strftime("%Y-%m-%d %H:%M:%S UTC"),
-        "runner_ip": runner_info,
-        "nodes": final_list
-    }
+        # 批量获取地理位置
+        ips = list(set([n['address'] for n in valid_nodes if re.match(r"^\d{1,3}(\.\d{1,3}){3}$", n['address'])]))
+        geo_data = {}
+        for i in range(0, len(ips), 100):
+            batch = ips[i:i+100]
+            try:
+                r = requests.post(GEO_API_URL, json=batch, timeout=10)
+                for item in r.json():
+                    geo_data[item['query']] = item
+            except: pass
+            time.sleep(1)
 
-    with open("nodes.json", "w", encoding='utf-8') as f:
-        json.dump(output_data, f, ensure_ascii=False, indent=2)
-    
-    print("Done. Data saved to nodes.json")
+        # 整合
+        for n in valid_nodes:
+            info = geo_data.get(n['address'], {})
+            n['country'] = info.get('country', 'Unknown')
+            n['city'] = info.get('city', 'Unknown')
+            n['isp'] = info.get('isp', 'Unknown')
+            n['flag'] = info.get('countryCode', '')
+
+        # 排序
+        valid_nodes.sort(key=lambda x: (x['country'], x['latency']))
+        
+        output = {
+            "server_info": {
+                "ip": self.runner_info.get("query"),
+                "location": f"{self.runner_info.get('country')} / {self.runner_info.get('city')}",
+                "isp": self.runner_info.get("isp"),
+                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+            },
+            "nodes": valid_nodes
+        }
+
+        with open("nodes.json", "w", encoding="utf-8") as f:
+            json.dump(output, f, indent=2, ensure_ascii=False)
+        print("[+] 处理完成，数据已写入 nodes.json")
 
 if __name__ == "__main__":
-    main()
+    sub = os.environ.get("SUBSCRIBE_URL")
+    if sub:
+        NodeProcessor().process(sub)
+    else:
+        print("[!] 未发现 SUBSCRIBE_URL 环境变量")
