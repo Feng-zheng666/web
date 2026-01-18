@@ -1,1 +1,2 @@
 https://e9cb6c.api.snpanel.org/ws/connect?token=e9cb6c3081115f204d640fefb6d6a38f
+https://raw.githubusercontent.com/chengaopan/AutoMergePublicNodes/master/list.meta.yml
