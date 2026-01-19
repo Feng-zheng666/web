@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自动化节点分析平台</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+SC:wght@300;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="cyber-bg"></div>
+    <div class="app-container">
+        <header class="glass-header">
+            <div class="brand">
+                <i class="fas fa-microchip"></i>
+                <div class="brand-text">
+                    <h1>NODE ANALYTICS</h1>
+                    <span>自动化节点测试与地理分析平台</span>
+                </div>
+            </div>
+            <div class="runner-card">
+                <div class="status-dot pulse"></div>
+                <div class="runner-details">
+                    <p id="runner-ip">正在检测分析源...</p>
+                    <small id="update-time">--</small>
+                </div>
+            </div>
+        </header>
+
+        <!-- 统计面板 -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-server"></i>
+                <div class="stat-info">
+                    <span class="label">存活节点</span>
+                    <span class="value" id="node-count">0</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-globe"></i>
+                <div class="stat-info">
+                    <span class="label">覆盖国家</span>
+                    <span class="value" id="country-count">0</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-tachometer-alt"></i>
+                <div class="stat-info">
+                    <span class="label">平均延迟</span>
+                    <span class="value" id="avg-latency">0ms</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 控制栏 -->
+        <div class="control-bar">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="node-search" placeholder="搜索节点名称、国家、ISP...">
+            </div>
+            <div class="filter-group" id="country-filters">
+                <button class="filter-btn active" data-country="all">全部</button>
+            </div>
+        </div>
+
+        <!-- 节点列表 -->
+        <main class="nodes-display" id="nodes-container">
+            <!-- 动态加载内容 -->
+            <div class="loading-state">
+                <div class="scanner"></div>
+                <p>正在扫描全球节点数据...</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- 弹窗通知 -->
+    <div id="toast" class="toast">复制成功</div>
+
+    <script src="script.js"></script>
+</body>
+</html>

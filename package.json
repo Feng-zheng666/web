@@ -1,0 +1,17 @@
+{
+  "name": "web",
+  "version": "1.0.0",
+  "description": "节点优选系统 - Web界面",
+  "scripts": {
+    "build": "echo 'Building static site...' && echo 'Build complete!'",
+    "prebuild": "echo 'No prebuild steps needed for static site'",
+    "deploy": "echo 'Deployment handled by Cloudflare Pages'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  },
+  "private": true
+}
