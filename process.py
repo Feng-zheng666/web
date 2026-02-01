@@ -112,6 +112,8 @@ class NodeProcessor:
             except: pass
             time.sleep(1)
 
+
+
         # 整合
         for n in valid_nodes:
             info = geo_data.get(n['address'], {})
